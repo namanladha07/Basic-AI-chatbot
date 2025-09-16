@@ -1,0 +1,156 @@
+import streamlit as st
+import random
+from datetime import datetime
+
+# Persona response generators
+def roastbot_response(user_input, history):
+    roasts = [
+        f"Oh wow, '{user_input}'... Did it take you all day to come up with that?",
+        f"Let me guess, you also think you're funny? '{user_input}' says otherwise.",
+        f"If I had a dollar for every unoriginal thought like '{user_input}', I'd be richer than your imagination.",
+        f"'{user_input}'? Did your keyboard fall asleep and type that by accident?",
+        f"I've seen better ideas in spam emails than '{user_input}'.",
+        f"'{user_input}'... Is that what you lead with on dating apps? Explains a lot.",
+        f"Wow, '{user_input}'... The intelligence is just dripping from that one.",
+        f"Let me check my database of interesting things... Nope, '{user_input}' isn't in there.",
+        f"'{user_input}'? Did you borrow that line from a cereal box?",
+        f"If '{user_input}' was a TV show, it would be cancelled after one episode."
+    ]
+    return random.choice(roasts)
+
+def shakespearebot_response(user_input, history):
+    shakespearean_phrases = [
+        f"Verily, thou sayest '{user_input}', and it dost give me pause to ponder.",
+        f"By mine troth, '{user_input}' is a query most peculiar in these modern times.",
+        f"Hark! '{user_input}' you say? Tis a matter for the court jester, not I.",
+        f"Pray, good sir/madam, '{user_input}' is a curious thing to bring before me.",
+        f"Zounds! '{user_input}' you proclaim? Thy words do dance like jesters at the king's feast.",
+        f"Marry, '{user_input}' is a topic that doth require much ale and merriment to properly address.",
+        f"Forsooth, in my day, '{user_input}' would have been settled with a duel of wits!",
+        f"Perchance, thou thinkest '{user_input}' is a worthy inquiry? Thou wouldst be mistaken.",
+        f"Alas, poor Yorick might have understood '{user_input}', but I certainly do not.",
+        f"Thou art as witty as a dried plum with this '{user_input}' you present me."
+    ]
+    return random.choice(shakespearean_phrases)
+
+def emojibot_response(user_input, history):
+    # Simple word to emoji mapping
+    emoji_dict = {
+        'love': '❤️', 'like': '👍', 'happy': '😄', 'sad': '😢', 'angry': '😠',
+        'hello': '👋', 'goodbye': '👋', 'yes': '✅', 'no': '❌', 'food': '🍕',
+        'water': '💧', 'fire': '🔥', 'cat': '🐱', 'dog': '🐶', 'sun': '☀️',
+        'moon': '🌙', 'star': '⭐', 'book': '📖', 'music': '🎵', 'movie': '🎬',
+        'car': '🚗', 'plane': '✈️', 'time': '⏰', 'money': '💵', 'phone': '📱',
+        'computer': '💻', 'rain': '🌧️', 'snow': '❄️', 'tree': '🌳', 'flower': '🌺'
+    }
+    
+    # Convert words to emojis where possible
+    words = user_input.lower().split()
+    emoji_words = []
+    for word in words:
+        # Remove punctuation
+        clean_word = ''.join(char for char in word if char.isalnum())
+        if clean_word in emoji_dict:
+            emoji_words.append(emoji_dict[clean_word])
+        else:
+            emoji_words.append(word)
+    
+    response = ' '.join(emoji_words)
+    
+    # If no emojis were found, use a default emoji response
+    if response == user_input:
+        response = "🤔 " + " ".join("🔤" for _ in words) + " ❓"
+    
+    return response
+
+def normalbot_response(user_input, history):
+    responses = [
+        f"I understand you said: '{user_input}'. How can I help you further?",
+        f"Thanks for your message: '{user_input}'. What would you like to know?",
+        f"Interesting point about '{user_input}'. Could you tell me more?",
+        f"I've noted your comment about '{user_input}'. Is there anything else you'd like to discuss?",
+        f"'{user_input}' is certainly something to think about. What's on your mind?",
+        f"Got it - you mentioned '{user_input}'. How can I assist you today?",
+        f"Noted: '{user_input}'. What would you like to talk about next?",
+        f"Thank you for sharing that '{user_input}' is important to you. How can I help?",
+        f"I appreciate you telling me about '{user_input}'. What else would you like to discuss?",
+        f"Understood: '{user_input}'. How may I be of service?"
+    ]
+    return random.choice(responses)
+
+# Initialize session state for chat history and persona
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+if "persona" not in st.session_state:
+    st.session_state.persona = "NormalBot"
+
+# Function to generate response based on selected persona
+def generate_response(user_input):
+    if st.session_state.persona == "RoastBot":
+        return roastbot_response(user_input, st.session_state.messages)
+    elif st.session_state.persona == "ShakespeareBot":
+        return shakespearebot_response(user_input, st.session_state.messages)
+    elif st.session_state.persona == "EmojiBot":
+        return emojibot_response(user_input, st.session_state.messages)
+    else:
+        return normalbot_response(user_input, st.session_state.messages)
+
+# Set up the Streamlit app
+st.set_page_config(page_title="Multi-Persona ChatBot", page_icon="🤖")
+st.title("🤖 Multi-Persona ChatBot")
+
+# Persona selection
+persona = st.sidebar.selectbox(
+    "Choose your chatbot persona:",
+    ("NormalBot", "RoastBot", "ShakespeareBot", "EmojiBot"),
+    key="persona_selector"
+)
+
+# Update the persona in session state
+if persona != st.session_state.persona:
+    st.session_state.persona = persona
+    st.session_state.messages = []  # Clear history when changing persona
+    st.rerun()
+
+# Display persona description
+st.sidebar.markdown("---")
+st.sidebar.markdown("**Persona Descriptions:**")
+if st.session_state.persona == "NormalBot":
+    st.sidebar.info("Friendly and helpful assistant")
+elif st.session_state.persona == "RoastBot":
+    st.sidebar.warning("Sarcastic and witty roaster")
+elif st.session_state.persona == "ShakespeareBot":
+    st.sidebar.info("Responds in Shakespearean English")
+elif st.session_state.persona == "EmojiBot":
+    st.sidebar.info("Translates everything to emojis")
+
+# Display chat history
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+# Chat input
+if prompt := st.chat_input("What would you like to say?"):
+    # Add user message to chat history
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    
+    # Display user message
+    with st.chat_message("user"):
+        st.markdown(prompt)
+    
+    # Generate and display assistant response
+    with st.chat_message("assistant"):
+        response = generate_response(prompt)
+        st.markdown(response)
+    
+    # Add assistant response to chat history
+    st.session_state.messages.append({"role": "assistant", "content": response})
+
+# Add clear chat button
+if st.sidebar.button("Clear Chat History"):
+    st.session_state.messages = []
+    st.rerun()
+
+# Display current persona
+st.sidebar.markdown("---")
+st.sidebar.success(f"Current Persona: **{st.session_state.persona}**")
